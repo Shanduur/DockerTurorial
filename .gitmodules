@@ -1,0 +1,3 @@
+[submodule "Earthly/repo"]
+	path = Earthly/repo
+	url = https://gitlab.com/sat-polsl/software/sat-firmware-launcher.git
