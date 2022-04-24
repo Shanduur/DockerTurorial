@@ -1,0 +1,62 @@
+VERSION 0.6
+FROM --platform=linux/amd64 ubuntu:jammy
+
+# deps:
+# install default dependencies
+RUN apt-get update && apt-get install -y \
+    clang-format \
+    cmake \
+    curl \
+    doxygen \
+    git \
+    gzip \
+    lbzip2 \
+    libfdt1 \
+    libpixman-1-0 \
+    libglib2.0-0 \
+    make \
+    openocd \
+    unzip
+
+# install ARM toolchain
+RUN curl -fsSL \
+    --output gcc-arm-none-eabi-10.3-2021.10.tar.bz2 \
+    https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-$(uname -m)-linux.tar.bz2
+RUN tar -xf gcc-arm-none-eabi-10.3-2021.10.tar.bz2 -C /usr/share/
+RUN ln -s /usr/share/gcc-arm-none-eabi-10.3-2021.10/bin/* /usr/bin/
+
+# install QEMU fork
+RUN curl -fsSL \
+    --output artifacts.zip \
+    https://gitlab.com/api/v4/projects/33158668/jobs/artifacts/sat-master/download?job=amd64-qemu-system-arm-linux-container
+RUN unzip artifacts.zip
+RUN install qemu-system-arm /usr/bin/qemu-system-arm
+
+build:
+    COPY ./repo /repo
+    WORKDIR /repo
+
+    # prepare build directory
+    RUN mkdir build-fw
+    WORKDIR /repo/build-fw
+    RUN cmake -D MCU=stm32l4 ..
+
+    # run build
+    RUN cmake --build .
+
+    WORKDIR /repo
+    RUN tar -czf build-fw.tar.gz build-fw
+
+    SAVE ARTIFACT build-fw.tar.gz AS LOCAL build-fw.tar.gz
+
+test:
+    COPY ./repo /repo
+    WORKDIR /repo
+
+    COPY build-fw.tar.gz /repo/build-fw.tar.gz
+    RUN tar -xf build-fw.tar.gz
+
+    WORKDIR /repo/build-fw
+
+    # run tests
+    RUN ctest
