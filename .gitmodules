@@ -1,0 +1,3 @@
+[submodule "Resources/reveal.js"]
+	path = Resources/reveal.js
+	url = https://github.com/hakimel/reveal.js.git
