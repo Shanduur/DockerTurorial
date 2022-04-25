@@ -6,7 +6,7 @@ let app = express();
 
 app.use(revealRunInTerminal({
   publicPath: __dirname,
-  commandRegex: /node|ruby|python/,
+  commandRegex: /node|ruby/,
   log: true
 }));
 
