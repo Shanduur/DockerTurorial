@@ -38,6 +38,6 @@ docker run -it --rm \
 ls /var/lib/docker/volumes/my-volume/_data
 cat /var/lib/docker/volumes/my-volume/_data/hello.txt
 
-docker run -p 80:80 \
+docker run -p 8080:80 \
     --mount type=bind,source=$(pwd)/app,target=/usr/local/apache2/htdocs/ \
     httpd
